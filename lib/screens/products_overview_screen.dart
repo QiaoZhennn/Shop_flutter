@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/providers/products_provider.dart';
 import 'package:my_app/screens/cart_screen.dart';
+import 'package:my_app/widgets/app_drawer.dart';
 import 'package:my_app/widgets/badge.dart';
 import 'package:provider/provider.dart';
-import 'package:my_app/widgets/ProductItem.dart';
+import 'package:my_app/widgets/product_item.dart';
 import '../providers/cart.dart';
 import '../providers/product.dart';
 
@@ -61,6 +62,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           )
         ],
       ),
+      drawer: AppDrawer(),
       body: GridView.builder(
         padding: const EdgeInsets.all(10),
         itemCount: products.length,
