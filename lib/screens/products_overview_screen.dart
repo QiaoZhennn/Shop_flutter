@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/providers/products_provider.dart';
+import 'package:my_app/providers/products.dart';
 import 'package:my_app/screens/cart_screen.dart';
 import 'package:my_app/widgets/app_drawer.dart';
 import 'package:my_app/widgets/badge.dart';
 import 'package:provider/provider.dart';
 import 'package:my_app/widgets/product_item.dart';
 import '../providers/cart.dart';
-import '../providers/product.dart';
 
 enum FilterOptions { Favorites, All }
 
@@ -19,9 +18,32 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   bool _showFavoritesOnly = false;
+  bool _isInit = true;
+  bool _isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context).fetchAndSetProducts().then((value) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final productsData = Provider.of<ProductsProvider>(context, listen: false);
+    final productsData = Provider.of<Products>(context);
     final products =
         _showFavoritesOnly ? productsData.favorite_items : productsData.items;
 
@@ -63,19 +85,23 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(10),
-        itemCount: products.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 3 / 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10),
-        itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-          value: products[i],
-          child: ProductItem(),
-        ),
-      ),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : GridView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: products.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 3 / 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10),
+              itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+                value: products[i],
+                child: ProductItemWidget(),
+              ),
+            ),
     );
   }
 }
